@@ -1,24 +1,29 @@
-# This is a template for a Ruby scraper on Morph (https://morph.io)
-# including some code snippets below that you should find helpful
+###################################################################################
+# Esto es un comentario, acá puede ir cualquier cosa
+###################################################################################
 
-# require 'scraperwiki'
-# require 'mechanize'
-#
-# agent = Mechanize.new
-#
-# # Read in a page
-# page = agent.get("http://foo.com")
-#
-# # Find somehing on the page using css selectors
-# p page.at('div.content')
-#
-# # Write out to the sqlite database using scraperwiki library
-# ScraperWiki.save_sqlite(["name"], {"name" => "susan", "occupation" => "software developer"})
-#
-# # An arbitrary query against the database
-# ScraperWiki.select("* from data where 'name'='peter'")
+import scraperwiki
+import simplejson
+import urllib2
 
-# You don't have to do things with the Mechanize or ScraperWiki libraries. You can use whatever gems are installed
-# on Morph for Ruby (https://github.com/openaustralia/morph-docker-ruby/blob/master/Gemfile) and all that matters
-# is that your final data is written to an Sqlite database called data.sqlite in the current working directory which
-# has at least a table called data.
+# QUERY es una VARIABLE que contiene un texto que define que la consulta que queremos hacer,
+# acá se pueden introducir varios operadores como "from:nombre", que devuelve tweets enviados desde ese usuario
+# más info de estos operadores acá: https://dev.twitter.com/docs/using-search
+QUERY = '#tedxcordoba since:2014-06-01 until:2014-07-30'
+RESULTS_PER_PAGE = '100'
+LANGUAGE = 'es'
+NUM_PAGES = 1000 
+
+for page in range(1, NUM_PAGES+1):
+
+    # Esto es lo que se llama una búsqueda por GET, referencia en Twitter:
+    # https://dev.twitter.com/docs/api/1/get/search
+    base_url = 'http://search.twitter.com/search.json?q=%s&rpp=%s&lang=%s&page=%s' \
+         % (urllib2.quote(QUERY), RESULTS_PER_PAGE, LANGUAGE, page)
+    try:
+        results_json = simplejson.loads(scraperwiki.scrape(base_url))
+        for result in results_json['results']:
+            #print result
+            data = {}
+            data['id'] = result['id']
+            data['text'] = result['t
